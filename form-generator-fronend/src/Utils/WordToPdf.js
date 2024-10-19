@@ -33,14 +33,14 @@ export const convertWordToPdf = async (docFile) => {
     // Create a URL for the blob
     const pdfUrl = URL.createObjectURL(pdfBlob);
 
-    // Trigger a download
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = 'converted.pdf'; // Name for the downloaded file
-    document.body.appendChild(link); // Append link to the body
-    link.click(); // Programmatically click the link
-    document.body.removeChild(link); // Remove the link after downloading
-    URL.revokeObjectURL(pdfUrl); // Clean up the URL object
+    // // Trigger a download
+    // const link = document.createElement('a');
+    // link.href = pdfUrl;
+    // link.download = 'converted.pdf'; // Name for the downloaded file
+    // document.body.appendChild(link); // Append link to the body
+    // link.click(); // Programmatically click the link
+    // document.body.removeChild(link); // Remove the link after downloading
+    // URL.revokeObjectURL(pdfUrl); // Clean up the URL object
 
     return pdfBlob; // Return the PDF Blob directly
   } catch (error) {

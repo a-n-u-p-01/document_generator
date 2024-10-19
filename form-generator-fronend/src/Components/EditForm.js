@@ -1,21 +1,27 @@
 import React, { useState } from "react";
 
-function EditForm({ setIsEdit, placeholders,fileName }) {
+function EditForm({ setIsEdit, placeholders }) {
   const [inputs, setInputs] = useState({});
+  const [fileName, setFileName] = useState(''); // State for the file name
   const [isUpdating, setIsUpdating] = useState(false);
   const [pdfLink, setPdfLink] = useState(null); // State for the PDF link
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setInputs({ ...inputs, [name]: value });
+  };
+
+  const handleFileNameChange = (event) => {
+    setFileName(event.target.value); // Update fileName state
   };
 
   const downloadPdf = () => {
     if (pdfLink) {
       const link = document.createElement('a');
       link.href = pdfLink;
-      link.download = `${fileName}-updated.pdf`;
+      link.download = `${fileName}-updated.pdf`; // Use the user-provided file name
       link.click();
-      window.location.reload()
+      window.location.reload();
     }
   };
 
@@ -40,7 +46,7 @@ function EditForm({ setIsEdit, placeholders,fileName }) {
       const formData = new FormData();
       formData.append('File', blob, 'Updated.docx'); // Append the blob with a filename
 
-      // Now convert the Word document to PDF using ConvertAPI
+      // Convert the Word document to PDF using ConvertAPI
       const convertResponse = await fetch('https://v2.convertapi.com/convert/docx/to/pdf', {
         method: 'POST',
         headers: {
@@ -51,9 +57,10 @@ function EditForm({ setIsEdit, placeholders,fileName }) {
 
       if (!convertResponse.ok) throw new Error('Conversion request failed');
       const convertData = await convertResponse.json();
-      console.log(convertData + "modified");
+      console.log(convertData + " modified");
       const pdfFile = convertData.Files[0];
-      console.log("modified data+++++",blob,pdfFile)
+      console.log("modified data+++++", blob, pdfFile);
+      
       // Set the PDF link to the state
       setPdfLink(`data:application/pdf;base64,${pdfFile.FileData}`);
       setIsUpdating(false); // Reset the updating state
@@ -70,8 +77,21 @@ function EditForm({ setIsEdit, placeholders,fileName }) {
         <div className="flex justify-center mt-8">
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-lg border border-gray-700 w-[60%]"
+            className="bg-white p-6 rounded-lg border border-gray-700 w-[60%] shadow-md"
           >
+            {/* File Name Input at the Top */}
+            <div className="mb-6">
+              <label className="block text-lg font-semibold mb-2 text-gray-700">
+                Enter File Name:
+              </label>
+              <input
+                type="text"
+                value={fileName}
+                onChange={handleFileNameChange}
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required 
+              />
+            </div>
             <h2 className="text-xl font-semibold mb-4">Fill in the placeholders:</h2>
             {placeholders.map((placeholder, index) => (
               <div key={index} className="mb-4">

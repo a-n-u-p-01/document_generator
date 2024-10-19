@@ -6,7 +6,6 @@ from database import Template
 
 app = Flask(__name__)
 CORS(app)
-
 @app.route('/upload', methods=['POST'])
 def upload_file():
     print("_______________Uploaded file received________________", request.files)
@@ -14,7 +13,9 @@ def upload_file():
     # Assuming the uploaded file is sent with key 'file'
     doc_file = request.files['docFile']
     name = request.form.get('name')
+    save = request.form.get('save')
     heading = request.form.get('heading')
+
     # Read the file content as binary before saving it
     doc_file_content = doc_file.read()
     file_path = 'uploaded.docx'
@@ -26,10 +27,10 @@ def upload_file():
     template_obj = Template() 
 
     # Save the template in the database with the binary content of the DOC file
-    pdf_file_content = request.files["pdfFile"].read()
-    
-    print(name,heading,"+++++++++++++++++++++++++++----------=========")
-    print("File uploaded and saved.", template_obj.save_template(name,heading,pdf_file_content, doc_file_content ))
+    if save == '1':  # Ensure this is a string comparison
+        pdf_file_content = request.files["pdfFile"].read()
+        print("File uploaded and saved.", template_obj.save_template(name, heading, pdf_file_content, doc_file_content))
+
     template_obj.close()
 
     # Load the document and find placeholders
@@ -37,6 +38,7 @@ def upload_file():
     placeholders = []
 
     for p in doc.paragraphs:
+        print(f"Checking paragraph: {p.text}")  # Debugging line
         if '{{' in p.text:
             found_placeholders = re.findall(r'\{\{\s*(.*?)\s*\}\}', p.text)
             placeholders.extend(found_placeholders)

@@ -40,7 +40,9 @@ class Template:
             template_obj = {
                 "id": row[0],
                 "pdf_file": pdf_file,
-                "doc_file": doc_file
+                "doc_file": doc_file,
+                "name": row[1],
+                "heading": row[4]
             }
             templates.append(template_obj)
         
