@@ -1,26 +1,34 @@
 import React, { useEffect, useState } from "react";
 
-function TemplateCard({ wordFile }) {
+function TemplateCard({ uploadedFile }) {
   const [pdfData, setPdfData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (wordFile && wordFile.pdfFile) {
+    if (uploadedFile && uploadedFile.pdf_file) {
       try {
-        const byteCharacters = atob(wordFile.pdfFile);
-        const byteNumbers = new Array(byteCharacters.length);
+        const base64Data = uploadedFile.pdf_file;
+       
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Uint8Array(byteCharacters.length);
+       
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: "application/pdf" });
+        const blob = new Blob([byteNumbers], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
+       
         setPdfData(url);
+
+        return () => {
+          URL.revokeObjectURL(url);
+        };
       } catch (err) {
+        console.error(err);
         setError("Error creating PDF URL: " + err.message);
       }
     }
-  }, [wordFile]);
+  }, [uploadedFile]);
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -30,11 +38,11 @@ function TemplateCard({ wordFile }) {
     <div className="w-80 h-fit flex items-center justify-center m-4 p-2 rounded shadow-lg bg-white">
       {pdfData ? (
         <div className="flex flex-col justify-center w-full">
-        <span>Name</span>
+          <span>Name</span>
           <iframe
             src={pdfData}
             width="100%"
-            height="300" // Set a fixed height for the iframe
+            height="300"
             title="PDF Document"
             className="overflow-y-hidden rounded shadow"
             allow="fullscreen"

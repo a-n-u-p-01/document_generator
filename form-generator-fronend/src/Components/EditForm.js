@@ -51,9 +51,9 @@ function EditForm({ setIsEdit, placeholders,fileName }) {
 
       if (!convertResponse.ok) throw new Error('Conversion request failed');
       const convertData = await convertResponse.json();
-      console.log(convertData);
+      console.log(convertData + "modified");
       const pdfFile = convertData.Files[0];
-
+      console.log("modified data+++++",blob,pdfFile)
       // Set the PDF link to the state
       setPdfLink(`data:application/pdf;base64,${pdfFile.FileData}`);
       setIsUpdating(false); // Reset the updating state
