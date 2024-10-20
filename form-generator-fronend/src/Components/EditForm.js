@@ -5,6 +5,7 @@ function EditForm({ setIsEdit, placeholders }) {
   const [fileName, setFileName] = useState(''); // State for the file name
   const [isUpdating, setIsUpdating] = useState(false);
   const [pdfLink, setPdfLink] = useState(null); // State for the PDF link
+  const [errorMessage, setErrorMessage] = useState(null); // State for error message
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -26,6 +27,7 @@ function EditForm({ setIsEdit, placeholders }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setErrorMessage(null)
     console.log("Submitting data:", inputs); 
     try {
       setIsUpdating(true);
@@ -36,6 +38,14 @@ function EditForm({ setIsEdit, placeholders }) {
         },
         body: JSON.stringify(inputs),
       });
+
+      if (!response.ok) {
+        const data = await response.json();
+        // Handle the 403 error by setting the errorMessage state
+        setErrorMessage(data);
+        setIsUpdating(false); // Reset the updating state
+        return;
+      }
 
       if (!response.ok) throw new Error('Network response was not ok');
 
@@ -70,9 +80,22 @@ function EditForm({ setIsEdit, placeholders }) {
     }
   };
 
+  const formatPlaceholders = (placeholders) => {
+    if (placeholders && Array.isArray(placeholders)) {
+      return placeholders.map(placeholder => `{${placeholder}}`).join(', ');
+    }
+    return 'No placeholders available';
+  };
+
   return (
     <>
-      {!isUpdating && pdfLink === null ? ( // Show form if not updating and no PDF link
+      {errorMessage ? (
+        <div className="mt-8 text-center p-4 bg-red-100 border border-red-400 rounded text-red-700">
+          <h2 className="text-xl font-semibold">Error: Missing Placeholders</h2>
+          <p className="mt-2">The following placeholders are missing or invalid:</p>
+          <p className="mt-2 font-mono text-lg">{formatPlaceholders(errorMessage.placeholders)+". Write the place holder in one go from {{ to }}, to keep the formate same."}</p>
+        </div>
+      ) : !isUpdating && pdfLink === null ? ( // Show form if not updating and no PDF link
         <div className="flex justify-center mt-8">
           <form
             onSubmit={handleSubmit}

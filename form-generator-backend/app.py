@@ -60,24 +60,28 @@ def replace_placeholders():
     try:
         doc = Document('uploaded.docx')
         updated = False
-
+        placeholder_presents = [f"{{{key}}}" for key in data.keys()]
+        print(placeholder_presents)
         for index,p in enumerate(doc.paragraphs):
-            print(f"pargraph:{index} text: {p.text}")
             for index,run in enumerate(p.runs):
-                # print(f"run:{index} text: {run.text}")
+                print(f"run:{index} text: {run.text}")
                 matches = re.findall(r'\{\{(.*?)\}\}', run.text)
-                # print("Place holder in runs",matches)
+                
                 for match in matches:
-                    # print("macth",match)
                     if match in data:
                         value = data[match]
-                        # print("value",value)
                         parts = re.split(r'\{\{' + re.escape(match) + r'\}\}', run.text)
-                        # print(parts)
                         run.text = parts[0]+value+parts[1]
                         updated=True
-                        # print(f"Updated run text: {run.text}")
+                      
+                        if f"{{{match}}}" in placeholder_presents:
+                            placeholder_presents.remove(f"{{{match}}}")
+                            print("Remaining Place Holder+++",placeholder_presents)
+                            print(f"Removed {match} from placeholders")
                         
+        if len(placeholder_presents)>0:
+            print("Remaining Place Holder",placeholder_presents)
+            return {"placeholders":placeholder_presents},403
 
         if updated:
             doc.save('uploaded.docx')

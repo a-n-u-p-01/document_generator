@@ -11,10 +11,10 @@ function Home() {
   const [isEdit, setIsEdit] = useState(false);
   const [fileName, setFileName] = useState("");
   const [heading, setHeading] = useState("");
+  const [isUploading, setIsUploading] = useState(false); // State for tracking upload progress
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
-
     if (selectedFile) {
       setFile(selectedFile);
       setFileName(selectedFile.name);
@@ -35,12 +35,13 @@ function Home() {
 
   const handleUpload = async (event) => {
     event.preventDefault();
+    setIsUploading(true);
     const formData = new FormData();
     formData.append("docFile", file);
     formData.append("name", fileName);
     formData.append("heading", heading);
     formData.append("save", 1);
-    
+
     const pdfFile = await convertWordToPdf(file);
     formData.append("pdfFile", pdfFile);
 
@@ -51,14 +52,17 @@ function Home() {
       });
 
       if (!response.ok) throw new Error("Network response was not ok");
+
       const data = await response.json();
       setPlaceholders(data.placeholders);
       setFile(null);
       setHeading("");
+      setIsUploading(false); // Set uploading state to false once done
+      setIsEdit(true); // Set editing mode on after upload
     } catch (error) {
       console.error("Error uploading file:", error);
+      setIsUploading(false); // Set uploading state to false on error
     }
-    setIsEdit(true);
   };
 
   const handleUse = async (docFile) => {
@@ -112,8 +116,9 @@ function Home() {
                 <button
                   type="submit"
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm h-10 w-24 rounded"
+                  disabled={isUploading} // Disable button during upload
                 >
-                  Upload
+                  {isUploading ? "Uploading..." : "Upload"}
                 </button>
               </div>
             </form>
