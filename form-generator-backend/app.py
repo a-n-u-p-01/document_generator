@@ -38,12 +38,12 @@ def upload_file():
     placeholders = []
 
     for p in doc.paragraphs:
-        print(f"Checking paragraph: {p.text}")  # Debugging line
         if '{{' in p.text:
             found_placeholders = re.findall(r'\{\{\s*(.*?)\s*\}\}', p.text)
-            placeholders.extend(found_placeholders)
+            for placeholder in found_placeholders:
+                if placeholder not in placeholders:  # Check if already added
+                    placeholders.append(placeholder)
 
-    placeholders = list(set(placeholders))
     print(f"Found placeholders: {placeholders}")
 
     return {'placeholders': placeholders}
@@ -61,28 +61,23 @@ def replace_placeholders():
         doc = Document('uploaded.docx')
         updated = False
 
-        for placeholder, value in data.items():
-            placeholder_regex = r'\{\{\s*' + re.escape(placeholder.strip()) + r'\s*\}\}'
-            pattern = re.compile(placeholder_regex, re.IGNORECASE)
-
-            for p in doc.paragraphs:
-                full_text = ''.join(run.text for run in p.runs)
-                matches = pattern.finditer(full_text)
-
+        for index,p in enumerate(doc.paragraphs):
+            print(f"pargraph:{index} text: {p.text}")
+            for index,run in enumerate(p.runs):
+                # print(f"run:{index} text: {run.text}")
+                matches = re.findall(r'\{\{(.*?)\}\}', run.text)
+                # print("Place holder in runs",matches)
                 for match in matches:
-                    updated = True
-                    start, end = match.span()
-
-                    current_index = 0
-                    for run in p.runs:
-                        run_length = len(run.text)
-                        run_end_index = current_index + run_length
-
-                        if current_index < end and run_end_index > start:
-                            new_run_text = full_text[:start] + value + full_text[end:]
-                            run.text = new_run_text[current_index:current_index + run_length]
-
-                        current_index += run_length
+                    # print("macth",match)
+                    if match in data:
+                        value = data[match]
+                        # print("value",value)
+                        parts = re.split(r'\{\{' + re.escape(match) + r'\}\}', run.text)
+                        # print(parts)
+                        run.text = parts[0]+value+parts[1]
+                        updated=True
+                        # print(f"Updated run text: {run.text}")
+                        
 
         if updated:
             doc.save('uploaded.docx')

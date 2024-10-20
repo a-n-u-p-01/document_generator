@@ -21,7 +21,6 @@ function EditForm({ setIsEdit, placeholders }) {
       link.href = pdfLink;
       link.download = `${fileName}-updated.pdf`; // Use the user-provided file name
       link.click();
-      window.location.reload();
     }
   };
 
