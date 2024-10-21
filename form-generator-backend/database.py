@@ -15,12 +15,8 @@ class Template:
         # SQL query to insert the template into the database
         sql = "INSERT INTO templates (name, heading, pdf_file, doc_file) VALUES (%s, %s, %s, %s)"
         values = (name,heading,pdfFile, docFile)
-        
         self.cursor.execute(sql, values)
         self.connection.commit()
-
-        # Return a temp_obj that might represent the saved template
-        temp_obj = {"id": self.cursor.lastrowid, "pdf_file": pdfFile, "doc_file": docFile}
         return "file saved"
     
     def getAll(self):

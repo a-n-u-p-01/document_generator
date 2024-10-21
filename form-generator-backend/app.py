@@ -8,9 +8,9 @@ app = Flask(__name__)
 CORS(app)
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    print("_______________Uploaded file received________________", request.files)
+    print("Uploaded file received:", request.files)
     
-    # Assuming the uploaded file is sent with key 'file'
+    # the uploaded file is sent with key 'file' from client frontend
     doc_file = request.files['docFile']
     name = request.form.get('name')
     save = request.form.get('save')
@@ -23,11 +23,11 @@ def upload_file():
     with open(file_path, 'wb') as f:
         f.write(doc_file_content)
 
-    # Create an instance of the Template class
+    # Create an instance of the Template class for data storage
     template_obj = Template() 
 
     # Save the template in the database with the binary content of the DOC file
-    if save == '1':  # Ensure this is a string comparison
+    if save == '1': #true if doc need to store in database
         pdf_file_content = request.files["pdfFile"].read()
         print("File uploaded and saved.", template_obj.save_template(name, heading, pdf_file_content, doc_file_content))
 
@@ -95,6 +95,7 @@ def replace_placeholders():
         print(f"Error updating document: {e}")
         return {"error": "Error updating document"}, 500
 
+#fetch all the templates from data
 @app.route('/templates', methods=['GET'])
 def get_templates():
     # Create an instance of the Template class
